@@ -7,6 +7,7 @@ from torch import nn
 from utils.loadData import load_data_fashion_mnist, show_images, get_fashion_mnist_labels
 from utils.train_ch3 import train_ch3
 
+# 用pytorch高级api实现的softmax回归
 batch_size = 256
 train_iter, test_iter = load_data_fashion_mnist(batch_size)
 num_epochs = 10
