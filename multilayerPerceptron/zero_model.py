@@ -1,7 +1,9 @@
 import torch
 from torch import nn
 from utils.loadData import load_data_fashion_mnist
+from utils.train_ch3 import train_ch3, predict_ch3
 
+# 多层感知机的手动实现
 batch_size = 256
 train_iter, test_iter = load_data_fashion_mnist(batch_size)
 
@@ -21,8 +23,15 @@ params = [W1, b1, W2, b2]
 def relu(X):
     a = torch.zeros_like(X)
     return torch.max(X, a)
-
+def net(X):
+    X = X.reshape(-1, num_inputs)
+    H = relu(X@W1 + b1)
+    return (H@W2 + b2)
 loss = nn.CrossEntropyLoss(reduction='none')
 
 num_epochs, lr = 10, 0.1
 updater = torch.optim.SGD(params=params, lr=lr)
+
+def zero_model_train():
+    train_ch3(net, train_iter, test_iter, loss, num_epochs, updater)
+    predict_ch3(net, test_iter)

@@ -25,5 +25,5 @@ loss = nn.CrossEntropyLoss(reduction='none')
 
 trainer = torch.optim.SGD(net.parameters(), lr=0.1)
 
-def testTrain_ch3_1():
+def testTrain_sapi_ch3():
     train_ch3(net, train_iter, test_iter, loss, num_epochs, trainer)
