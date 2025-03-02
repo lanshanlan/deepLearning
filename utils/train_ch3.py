@@ -6,6 +6,7 @@ from utils.plotfunc import set_axes, set_figsize, use_svg_display
 from torch import nn
 from utils.loadData import load_data_fashion_mnist, show_images, get_fashion_mnist_labels
 
+# 手写的softmax回归
 num_inputs = 784
 num_outputs = 10
 W = torch.normal(0, 0.01, size=(num_inputs, num_outputs), requires_grad=True)
@@ -121,6 +122,7 @@ def train_ch3(net, train_iter, test_iter, loss, num_epochs, updater):
         test_acc = evaluate_accuracy(net, test_iter)
         animator.add(epoch + 1, train_metrics + (test_acc,))
     train_loss, train_acc = train_metrics
+    print(f'test_acc={test_acc},train_acc={train_acc}')
     assert train_loss < 0.5, train_loss
     assert train_acc <= 1 and train_acc > 0.7, train_acc
     assert test_acc <= 1 and test_acc > 0.7, test_acc
@@ -133,7 +135,7 @@ def predict_ch3(net, test_iter, n=6):
     titles = [true + '\n' + pred for true, pred in zip(trues, preds)]
     show_images(X[0:n].reshape((n, 28, 28)), 1, n, titles=titles[0:n])
 
-def testTrain():
+def testTrain_ch3():
     train_ch3(net, train_iter, test_iter, cross_entropy, num_epochs, updater)
     predict_ch3(net, test_iter)
 

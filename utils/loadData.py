@@ -13,6 +13,7 @@ def get_dataloader_workers():
 
 def load_data_fashion_mnist(batch_size, resize=None):
     """下载fashion mnist，然后加载到内存中"""
+    print(f'batch_size={batch_size}')
     trains = transforms.ToTensor()
     if resize:
         trains.insert(0, transforms.Resize(resize))
