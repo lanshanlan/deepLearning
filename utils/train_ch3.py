@@ -49,6 +49,16 @@ def evaluate_accuracy(net, data_iter):
             metric.add(accuracy(net(X), y), y.numel())
     return metric[0] / metric[1]
 
+def evaluate_loss(net, data_iter, loss):
+    """评估给定数据集上模型的损失"""
+    metric = Accumulator(2) # 损失的总和，样本数量
+    for X, y in data_iter:
+        out = net(X)
+        y = y.reshape(out.shape)
+        l = loss(out, y)
+        metric.add(l.sum(), l.numel())
+    return metric[0] / metric[1]
+
 def train_epoch_ch3(net, train_iter, loss, updater):
     """训练模型一轮"""
     # 将模型设置为训练模式
