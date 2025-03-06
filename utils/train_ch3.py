@@ -1,0 +1,152 @@
+import torch
+from matplotlib import pyplot as plt
+from utils.activatefunc import accuracy, sgd, cross_entropy, softmax
+from IPython import display
+from utils.plotfunc import set_axes, set_figsize, use_svg_display
+from torch import nn
+from utils.loadData import load_data_fashion_mnist, show_images, get_fashion_mnist_labels
+
+# 手写的softmax回归
+num_inputs = 784
+num_outputs = 10
+W = torch.normal(0, 0.01, size=(num_inputs, num_outputs), requires_grad=True)
+b = torch.zeros(num_outputs, requires_grad=True)
+train_iter, test_iter = load_data_fashion_mnist(batch_size=256)
+lr = 0.1 # 学习率
+num_epochs = 10 # 训练轮数
+
+for X, y in train_iter:
+    print(X.shape, X.dtype, y.shape, y.dtype)
+    break
+
+def net(X):
+    return softmax(torch.matmul(X.reshape((-1, W.shape[0])), W) + b)
+
+def updater(batch_size):
+    return sgd([W, b], lr, batch_size)
+
+class Accumulator:
+    """在n各变量上累加"""
+    def __init__(self, n):
+        self.data = [0.0] * n
+
+    def add(self, *args):
+        self.data = [a + float(b) for a, b in zip(self.data, args)]
+
+    def reset (self):
+        self.data = [0, 0] * len(self.data)
+
+    def __getitem__(self, idx):
+        return self.data[idx]
+
+def evaluate_accuracy(net, data_iter):
+    """计算在指定数据集上模型的精度"""
+    if isinstance(net, torch.nn.Module):
+        net.eval() # 将模型设置为评估模式
+    metric = Accumulator(2) # 正确预测数、预测总数
+    with torch.no_grad():
+        for X, y in data_iter:
+            metric.add(accuracy(net(X), y), y.numel())
+    return metric[0] / metric[1]
+
+def evaluate_loss(net, data_iter, loss):
+    """评估给定数据集上模型的损失"""
+    metric = Accumulator(2) # 损失的总和，样本数量
+    for X, y in data_iter:
+        out = net(X)
+        y = y.reshape(out.shape)
+        l = loss(out, y)
+        metric.add(l.sum(), l.numel())
+    return metric[0] / metric[1]
+
+class Animator:
+    """在动画中绘制数据"""
+    def __init__(self, xlabel=None, ylabel=None, legend=None, xlim=None,
+                 ylim=None, xscale='linear', yscale='linear',
+                 fmts=('-', 'm--', 'g-.', 'r:'), nrows=1, ncols=1, figsize=(3.5, 2.5)):
+        # 增量的绘制多条线
+        if legend is None:
+            legend = []
+        use_svg_display()
+        self.fig, self.axes = plt.subplots(nrows, ncols, figsize=figsize)
+        if nrows * ncols == 1:
+            self.axes = [self.axes, ]
+        # 使用lambda函数捕获参数
+        self.config_axes = lambda: set_axes(self.axes[0], xlabel, ylabel, xlim, ylim, 
+                                            xscale, yscale,legend)
+        self.X, self.Y, self.fmts = None, None, fmts
+
+    def add(self, x, y):
+        # 向图表中添加多个数据点
+        if not hasattr(y, "__len__"):
+            y = [y]
+        n = len(y)
+        if not hasattr(x, "__len__"):
+            x = [x] * n
+        if not self.X:
+            self.X = [[] for _ in range(n)]
+        if not self.Y:
+            self.Y = [[] for _ in range(n)]
+        for i, (a, b) in enumerate(zip(x, y)):
+            if a is not None and b is not None:
+                self.X[i].append(a)
+                self.Y[i].append(b)
+        self.axes[0].cla()
+        for x, y, fmt in zip(self.X, self.Y, self.fmts):
+            self.axes[0].plot(x, y, fmt)
+        self.config_axes()
+        display.display(self.fig)
+        display.clear_output(wait=True)
+
+def train_epoch_ch3(net, train_iter, loss, updater):
+    """训练模型一轮"""
+    # 将模型设置为训练模式
+    if isinstance(net, torch.nn.Module):
+        net.train()
+
+    # 训练损失综合、训练准确度总和、样本数
+    metric = Accumulator(3)
+    for X, y in train_iter:
+        # 计算梯度并更新参数
+        y_hat = net(X)
+        l = loss(y_hat, y)
+        if isinstance(updater, torch.optim.Optimizer):
+            # 使用Pytorch内置的优化器和损失函数
+            updater.zero_grad()
+            l.mean().backward()
+            updater.step()
+        else:
+            # 使用定制的优化器和损失函数
+            l.sum().backward()
+            updater(X.shape[0])
+        metric.add(float(l.sum()), accuracy(y_hat, y), y.numel())
+    # 返回训练损失和训练精度
+    return metric[0] / metric[2], metric[1] / metric[2]
+
+def train_ch3(net, train_iter, test_iter, loss, num_epochs, updater):
+    """训练模型"""
+    animator = Animator(xlabel='epoch', xlim=[1, num_epochs], ylim=[0.3, 0.9],
+                        legend=['train loss', 'train acc', 'test acc'])
+    for epoch in range(num_epochs):
+        train_metrics = train_epoch_ch3(net, train_iter, loss, updater)
+        test_acc = evaluate_accuracy(net, test_iter)
+        animator.add(epoch + 1, train_metrics + (test_acc,))
+    train_loss, train_acc = train_metrics
+    print(f'test_acc={test_acc},train_acc={train_acc}')
+    assert train_loss < 0.5, train_loss
+    assert train_acc <= 1 and train_acc > 0.7, train_acc
+    assert test_acc <= 1 and test_acc > 0.7, test_acc
+
+def predict_ch3(net, test_iter, n=6):
+    for X, y in test_iter:
+        break
+    trues = get_fashion_mnist_labels(y)
+    preds = get_fashion_mnist_labels(net(X).argmax(axis=1))
+    titles = [true + '\n' + pred for true, pred in zip(trues, preds)]
+    show_images(X[0:n].reshape((n, 28, 28)), 1, n, titles=titles[0:n])
+
+def testTrain_ch3():
+    train_ch3(net, train_iter, test_iter, cross_entropy, num_epochs, updater)
+    predict_ch3(net, test_iter)
+
+from utils.loadData import load_data_fashion_mnist
