@@ -29,6 +29,9 @@ def evaluate_accuracy_gpu(net, data_iter, device=None):
 
 def train_ch6(net, train_iter, test_iter, num_epochs, lr, device='cpu'):
     """用GPU训练模型"""
+    for X, y in train_iter:
+        print(X.shape, X.dtype, y.shape, y.dtype)
+        break
     def init_weights(m):
         if type(m) == nn.Linear or type(m) == nn.Conv2d:
             # 使用xavier初始化，‌缓解梯度消失或爆炸

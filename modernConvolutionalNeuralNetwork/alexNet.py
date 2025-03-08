@@ -3,6 +3,7 @@ from torch import nn
 from utils.loadData import load_data_fashion_mnist
 from utils.train_ch6 import train_ch6
 from utils.print_layer import print_layer
+from utils.gpu import try_gpu
 
 batch_size = 128
 train_iter, test_iter = load_data_fashion_mnist(batch_size, resize=224)
@@ -41,4 +42,4 @@ def print_alex_net_layer():
 
 def test_AlexNet():
     lr, num_epochs = 0.01, 10
-    train_ch6(net, train_iter, test_iter, num_epochs, lr)
+    train_ch6(net, train_iter, test_iter, num_epochs, lr, try_gpu())
