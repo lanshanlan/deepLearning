@@ -6,6 +6,10 @@ def softmax(X):
     partition = X_exp.sum(1, keepdim=True)
     return X_exp / partition
 
+def sigmoid(X):
+    """sigmoid激活函数"""
+    return 1 / (1 + torch.exp(-X))
+
 def cross_entropy(y_hat, y):
     """交叉熵误差"""
     return - torch.log(y_hat[range(len(y_hat)), y])

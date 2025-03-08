@@ -9,11 +9,13 @@ from utils.loadData import load_data_fashion_mnist, show_images, get_fashion_mni
 # 手写的softmax回归
 num_inputs = 784
 num_outputs = 10
+batch_size = 256 # 每批样本个数
 W = torch.normal(0, 0.01, size=(num_inputs, num_outputs), requires_grad=True)
 b = torch.zeros(num_outputs, requires_grad=True)
-train_iter, test_iter = load_data_fashion_mnist(batch_size=256)
+train_iter, test_iter = load_data_fashion_mnist(batch_size=batch_size)
 lr = 0.1 # 学习率
 num_epochs = 10 # 训练轮数
+num_batchs = len(train_iter) # 一轮的训练批次
 
 for X, y in train_iter:
     print(X.shape, X.dtype, y.shape, y.dtype)
