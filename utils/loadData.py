@@ -14,16 +14,17 @@ def get_dataloader_workers():
 def load_data_fashion_mnist(batch_size, resize=None):
     """下载fashion mnist，然后加载到内存中"""
     print(f'batch_size={batch_size}')
-    trains = transforms.ToTensor()
+    trans = [transforms.ToTensor()]
     if resize:
-        trains.insert(0, transforms.Resize(resize))
+        trans.insert(0, transforms.Resize(resize))
+    trans = transforms.Compose(trans)
     mnist_train = torchvision.datasets.FashionMNIST(
-        root='../data', train=True, transform=trains, download=True
+        root='../data', train=True, transform=trans, download=True
     )
     mnist_test = torchvision.datasets.FashionMNIST(
-        root='../data', train=False, transform=trains, download=True
+        root='../data', train=False, transform=trans, download=True
     )
-    print(f'len1(mnist_train)={len(mnist_train)}, len(mnist_test)={len(mnist_test)}')
+    print(f'len(mnist_train)={len(mnist_train)}, len(mnist_test)={len(mnist_test)}')
     
     return (data.DataLoader(mnist_train, batch_size, shuffle=True,
                                 num_workers=get_dataloader_workers()),

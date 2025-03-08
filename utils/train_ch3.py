@@ -6,27 +6,6 @@ from utils.plotfunc import set_axes, set_figsize, use_svg_display
 from torch import nn
 from utils.loadData import load_data_fashion_mnist, show_images, get_fashion_mnist_labels
 
-# 手写的softmax回归
-num_inputs = 784
-num_outputs = 10
-batch_size = 256 # 每批样本个数
-W = torch.normal(0, 0.01, size=(num_inputs, num_outputs), requires_grad=True)
-b = torch.zeros(num_outputs, requires_grad=True)
-train_iter, test_iter = load_data_fashion_mnist(batch_size=batch_size)
-lr = 0.1 # 学习率
-num_epochs = 10 # 训练轮数
-num_batchs = len(train_iter) # 一轮的训练批次
-
-for X, y in train_iter:
-    print(X.shape, X.dtype, y.shape, y.dtype)
-    break
-
-def net(X):
-    return softmax(torch.matmul(X.reshape((-1, W.shape[0])), W) + b)
-
-def updater(batch_size):
-    return sgd([W, b], lr, batch_size)
-
 class Accumulator:
     """在n各变量上累加"""
     def __init__(self, n):
@@ -127,6 +106,9 @@ def train_epoch_ch3(net, train_iter, loss, updater):
 
 def train_ch3(net, train_iter, test_iter, loss, num_epochs, updater):
     """训练模型"""
+    for X, y in train_iter:
+        print(X.shape, X.dtype, y.shape, y.dtype)
+        break
     animator = Animator(xlabel='epoch', xlim=[1, num_epochs], ylim=[0.3, 0.9],
                         legend=['train loss', 'train acc', 'test acc'])
     for epoch in range(num_epochs):
@@ -148,7 +130,26 @@ def predict_ch3(net, test_iter, n=6):
     show_images(X[0:n].reshape((n, 28, 28)), 1, n, titles=titles[0:n])
 
 def testTrain_ch3():
+    # 手写的softmax回归
+    num_inputs = 784
+    num_outputs = 10
+    batch_size = 256 # 每批样本个数
+    W = torch.normal(0, 0.01, size=(num_inputs, num_outputs), requires_grad=True)
+    b = torch.zeros(num_outputs, requires_grad=True)
+    train_iter, test_iter = load_data_fashion_mnist(batch_size=batch_size)
+    lr = 0.1 # 学习率
+    num_epochs = 10 # 训练轮数
+    num_batchs = len(train_iter) # 一轮的训练批次
+
+    for X, y in train_iter:
+        print(X.shape, X.dtype, y.shape, y.dtype)
+        break
+
+    def net(X):
+        return softmax(torch.matmul(X.reshape((-1, W.shape[0])), W) + b)
+
+    def updater(batch_size):
+        return sgd([W, b], lr, batch_size)
     train_ch3(net, train_iter, test_iter, cross_entropy, num_epochs, updater)
     predict_ch3(net, test_iter)
 
-from utils.loadData import load_data_fashion_mnist

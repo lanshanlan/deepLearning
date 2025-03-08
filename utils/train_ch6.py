@@ -35,7 +35,7 @@ def train_ch6(net, train_iter, test_iter, num_epochs, lr, device='cpu'):
             # xavier初始化不适用于ReLU等非线性激活函数
             nn.init.xavier_uniform_(m.weight)
     net.apply(init_weights)
-    print(f'training on ', device)
+    print(f'training on:', device)
     net.to(device)
     optimizer = torch.optim.SGD(net.parameters(), lr=lr)
     loss = nn.CrossEntropyLoss()
