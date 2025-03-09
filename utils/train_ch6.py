@@ -27,7 +27,7 @@ def evaluate_accuracy_gpu(net, data_iter, device=None):
             metric.add(accuracy(net(X), y), y.numel())
     return metric[0] / metric[1]
 
-def train_ch6(net, train_iter, test_iter, num_epochs, lr, device='cpu'):
+def train_ch6(net, train_iter, test_iter, num_epochs, lr, device):
     """用GPU训练模型"""
     for X, y in train_iter:
         print(X.shape, X.dtype, y.shape, y.dtype)
