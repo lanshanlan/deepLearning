@@ -1,6 +1,7 @@
 import collections
 import re
 from utils.rnn.downloadFile import DATA_HUB, DATA_URL, download, download_extract
+from utils.plotfunc import plot
 
 DATA_HUB['time_machine'] = (DATA_URL + 'timemachine.txt',
                             '090b5e7e70c295757f55df93cb0a180b9691891a')
@@ -38,6 +39,7 @@ def count_corpus(tokens):
     if len(tokens) == 0 or isinstance(tokens[0], list):
         # 将词元列表展平成一个列表
         tokens = [token for line in tokens for token in line]
+    # print('tokens2', tokens)
     return collections.Counter(tokens)
 
 class Vocab:
@@ -95,7 +97,9 @@ def test_vocab():
 def load_corpus_time_machine(max_tokens=-1):
     """返回时光机器数据集的词元索引列表和词表"""
     lines = read_time_machine()
-    tokens = tokenize(lines, 'char')
+    # tokens = tokenize(lines, 'char')
+    tokens = tokenize(lines)
+    # print('tokens:',tokens)
     vocab = Vocab(tokens)
     # 因为时光机器数据集中的每个文本行不一定是一个句子或一个段落，所以将所有文本行展平道一个列表中
     corpus = [vocab[token] for line in tokens for token in line]
@@ -104,7 +108,30 @@ def load_corpus_time_machine(max_tokens=-1):
     return corpus, vocab
 
 def test_load_corpus_time_machine():
-    corpus , vacab = load_corpus_time_machine()
-    print(len(corpus), len(vacab))
-    print(corpus[:50])
+    corpus , vocab = load_corpus_time_machine()
+    # print(len(corpus), len(vocab), vocab.token_freqs)
+    # print(corpus[:50])
+    freqs = [freq for token, freq in vocab.token_freqs]
+    plot(freqs, xlabel='token: x', ylabel='frequency: n(x)', xscale='log', yscale='log')
+
+# 测试不同的词元语法（一元语法，二元语法，三元语法）下，词元和频率的关系
+def test_multi_tokens():
+    lines = read_time_machine()
+    tokens = tokenize(lines)
+    corpus = [token for line in tokens for token in line]
+    vocab = Vocab(corpus)
+    # 二元语法
+    bigram_tokens = [pair for pair in zip(corpus[:-1], corpus[1:])]
+    bigram_vocab = Vocab(bigram_tokens)
+    # 三元语法
+    trigram_tokens = [triple for triple in zip(corpus[:-2], corpus[1:-1], corpus[2:])]
+    trigram_vocab = Vocab(trigram_tokens)
+    print('bigram_vocab.token_freqs[:10]:', bigram_vocab.token_freqs[:10])
+    print('trigram_vocab.token_freqs[:10]:', trigram_vocab.token_freqs[:10])
+    freqs = [freq for token, freq in vocab.token_freqs]
+    bigram_freqs = [freq for token, freq in bigram_vocab.token_freqs]
+    trigram_freqs = [freq for token, freq in trigram_vocab.token_freqs]
+    plot([freqs, bigram_freqs, trigram_freqs], xlabel='token: x', ylabel='frequency: n(x)',
+         xscale='log', yscale='log', legend=['unigram', 'bigram', 'trigram'])
+
 
