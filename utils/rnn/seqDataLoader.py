@@ -43,7 +43,7 @@ def seq_data_iter_sequential(corpus, batch_size, num_steps):
     Xs = torch.tensor(corpus[offset: offset + num_tokens])
     Ys = torch.tensor(corpus[offset + 1: offset + 1 + num_tokens])
     Xs, Ys = Xs.reshape(batch_size, -1), Ys.reshape(batch_size, -1)
-    print(Xs.shape)
+    # print(Xs.shape)
     num_batchs = Xs.shape[1] // num_steps
     for i in range(0, num_steps * num_batchs, num_steps):
         X = Xs[:, i: i + num_steps]
