@@ -3,6 +3,7 @@ import re
 from utils.rnn.downloadFile import DATA_HUB, DATA_URL, download, download_extract
 from utils.plotfunc import plot
 
+# 循环神经网络训练数据：时间机器 文本数据集
 DATA_HUB['time_machine'] = (DATA_URL + 'timemachine.txt',
                             '090b5e7e70c295757f55df93cb0a180b9691891a')
 
