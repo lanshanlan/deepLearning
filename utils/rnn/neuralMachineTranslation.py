@@ -86,12 +86,11 @@ def truncate_pad(line, num_steps, padding_token):
         return line[:num_steps] # 截断
     return line + [padding_token] * (num_steps - len(line)) # 填充
 
-raw_text = read_data_nmt()
-text = preprocess_nmt(raw_text)
-source, target = tokenize_nmt(text)
-src_vocab = Vocab(source, min_freq=2, reserved_tokens=['<pad>', '<bos>', '<eos>'])
-
 def test_truncate_pad():
+    raw_text = read_data_nmt()
+    text = preprocess_nmt(raw_text)
+    source, target = tokenize_nmt(text)
+    src_vocab = Vocab(source, min_freq=2, reserved_tokens=['<pad>', '<bos>', '<eos>'])
     print(truncate_pad(src_vocab[source[0]], 10, src_vocab['<pad>']))
 
 def build_array_nmt(lines, vocab, num_steps):
